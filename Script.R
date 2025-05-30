@@ -5,8 +5,8 @@ library(stringr)
 library(ggplot2)
 library(purrr)
 library(RColorBrewer)
-
-#### PAISES
+library(readr)
+library(pheatmap)
 
 # Cargar los datos
 dades <- read_excel("E:/TFM/Anàlisis R/Base de dades_def.xlsx", sheet='Llista articles')
@@ -21,7 +21,7 @@ separate_countries <- function(country_string) {
 dades_country <- dades %>%
   mutate(Country = map(`Country of the data`, separate_countries)) %>%
   unnest(Country) %>%
-  mutate(Country = str_trim(Country))  # Eliminar espacios en blanco al principio y al final
+  mutate(Country = str_trim(Country))
 
 
 paises <- dades_country$Country
@@ -497,15 +497,8 @@ comp_risk_df <- as.data.frame(comp_risk)
 comp_risk_prop_df <- as.data.frame(comp_risk_prop)
 
 
-# Cargar paquetes
-library(dplyr)
-library(ggplot2)
-library(readr)
-library(tidyr)
-library(readxl)
-library(pheatmap)
 
-# Leer archivo
+
 df <- read_excel("E:/TFM/Anàlisis R/Base de dades_def.xlsx", sheet='Llista articles')
 #df <- read_excel("C:/Users/vmartinezr/Documents/TFM/Final/Base de dades_def.xlsx", sheet='Llista articles')
 
@@ -564,23 +557,16 @@ solo_comparacion <- df_metodos %>%
 
 cat("Artículos con solo comparación de curvas:", nrow(solo_comparacion), "\n")
 
-# ---- Análisis 5: Kaplan-Meier + Cox ----
-km_cox <- df_metodos %>%
-  filter(`Kaplan-Meier` == 1 & Cox == 1)
 
-cat("Artículos con Kaplan-Meier + Cox:", nrow(km_cox), "\n")
-
-# Análisis de combinaciones frecuentes
+# Análisis de combinaciones
 df_metodos$combo <- apply(df_metodos, 1, function(row) {
   paste(names(df_metodos)[which(row == 1)], collapse = " + ")
 })
 
-# Contar combinaciones
 combinaciones <- df_metodos %>%
   count(combo, sort = TRUE) %>%
   filter(combo != "")
 
-# Ver top combinaciones
 print(head(combinaciones, 10))
 
 #Filtraremos por los métodos usados al menos en 5 artículos
